@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <soap:Header>
+        <FEHeaderInfo xmlns="http://ar.gov.afip.dif.FEV1/">
+            <ambiente>Produccion - efa</ambiente>
+            <fecha>2024-01-06T16:30:20.24425-03:00</fecha>
+            <id>5.4.0.0</id>
+        </FEHeaderInfo>
+    </soap:Header>
+
+    <soap:Body>
+        <FECAESolicitarResponse xmlns="http://ar.gov.afip.dif.FEV1/">
+            <FECAESolicitarResult>
+                <FeCabResp>
+                    <Cuit>20416041637</Cuit>
+                    <PtoVta>12</PtoVta>
+                    <CbteTipo>1</CbteTipo>
+                    <FchProceso>20240106163020</FchProceso>
+                    <CantReg>1</CantReg>
+                    <Resultado>R</Resultado>
+                    <Reproceso>N</Reproceso>
+                </FeCabResp>
+
+                <FeDetResp>
+                    <FECAEDetResponse>
+                        <Concepto>1</Concepto>
+                        <DocTipo>80</DocTipo>
+                        <DocNro>20111111112</DocNro>
+                        <CbteDesde>1</CbteDesde>
+                        <CbteHasta>1</CbteHasta>
+                        <CbteFch>20240101</CbteFch>
+                        <Resultado>R</Resultado>
+                        <CAE />
+                        <CAEFchVto />
+                    </FECAEDetResponse>
+                </FeDetResp>
+
+                <Errors>
+                    <Err><Code>10016</Code>
+                        <Msg>El numero o fecha del comprobante no se corresponde con el proximo a autorizar. Consultar metodo FECompUltimoAutorizado.</Msg>
+                    </Err>
+                </Errors>
+            </FECAESolicitarResult>
+        </FECAESolicitarResponse>
+    </soap:Body>
+</soap:Envelope>

@@ -1,0 +1,6 @@
+@afipServices_HostAddress = http://localhost:5182
+
+GET {{afipServices_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
