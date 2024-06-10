@@ -483,6 +483,3 @@ $RECYCLE.BIN/
 # Vim temporary swap files
 *.swp
 
-#secret files
-[Ss]ecrets/[Cc]ertificates/*
-[Ss]ecrets/[Ee]nv/*
