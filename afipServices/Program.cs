@@ -1,10 +1,17 @@
-/*
+using afipServices.src.Common.enums;
+using afipServices.src.Encryption;
+using afipServices.src.Encryption.interfaces;
+using afipServices.src.WSAA;
+using afipServices.src.WSAA.interfaces;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+//adds HttpClientFactory
+builder.Services.AddHttpClient();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddSingleton<IEncryptionManager, EncryptionManager>();
+builder.Services.AddSingleton<IWSAAService, WSAAService>();
 
 var app = builder.Build();
 
@@ -17,15 +24,16 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-
+Environment.SetEnvironmentVariable("X509CertDir", "./secrets/certificates/certificadoAfipConClaveFinal.pfx");
+EncryptionManager encryption = app.Services.GetRequiredService<EncryptionManager>();
+string? x = encryption.GetEncryptedLoginTicketRequest(AfipService.wsfe);
+string y = (x == null) ? "NULL" : x;
+Console.WriteLine(y);
+var k = app.Services.GetRequiredService<IWSAAService>();
 
 app.Run();
-*/
 
-using afipServices.src.Common.enums;
-using afipServices.src.Encryption;
 
-Environment.SetEnvironmentVariable("X509CertDir", "./secrets/certificates/certificadoAfipConClaveFinal.pfx");
 
-string? x = EncryptionManager.GetEncryptedLoginTicketRequest(AfipService.wsfe);
-Console.WriteLine(x);
+
+
