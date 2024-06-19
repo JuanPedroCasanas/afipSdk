@@ -23,14 +23,23 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+//ENVIRONMENT VARIABLES!!!
 Environment.SetEnvironmentVariable("X509CertDir", "./secrets/certificates/certificadoAfipConClaveFinal.pfx");
-EncryptionManager encryption = app.Services.GetRequiredService<EncryptionManager>();
-string? x = encryption.GetEncryptedLoginTicketRequest(AfipService.wsfe);
-string y = (x == null) ? "NULL" : x;
-Console.WriteLine(y);
-var k = app.Services.GetRequiredService<IWSAAService>();
 
+Environment.SetEnvironmentVariable("WSAALoginCmsTestingUri", "https://wsaahomo.afip.gov.ar/ws/services/LoginCms");
+
+
+
+
+
+var encryption = app.Services.GetRequiredService<IEncryptionManager>();
+
+var k = app.Services.GetRequiredService<IWSAAService>();
+/*
+var s = await k.GetAuthenticationToken(AfipService.wsfe);
+
+Console.WriteLine(s.ToString());
+*/
 app.Run();
 
 

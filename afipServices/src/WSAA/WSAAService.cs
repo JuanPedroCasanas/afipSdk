@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using afipServices.src.Common.enums;
@@ -17,21 +18,46 @@ namespace afipServices.src.WSAA
         IHttpClientFactory httpClientFactory
         ) : IWSAAService
     {
-        public async Task<WSAAAuthToken> GetAuthenticationToken(AfipService service)
+        public async Task<WSAAAuthToken?> GetAuthenticationToken(AfipService service)
         {
             try
             {
                 string encryptedLoginTicket = encryptionManager.GetEncryptedLoginTicketRequest(service) ?? throw new WSAAServiceException("Failed to fetch a WSAA Authentication token: Failed to encrypt LoginRequest");
-                string request =  GetLoginCmsRequest(encryptedLoginTicket) ?? throw new WSAAServiceException("Error generating LoginCmsRequest");
-                
+                string request = GetLoginCmsRequest(encryptedLoginTicket) ?? throw new WSAAServiceException("Error generating LoginCmsRequest");
                 using HttpClient client = httpClientFactory.CreateClient();
-                
+                     
+                client.DefaultRequestHeaders.Add("SOAPAction", "loginCMS");
+                client.DefaultRequestHeaders.Add("User-Agent", "Apache-HttpClient/4.1.1 (java 1.5)");
 
-                //await client.PostAsync    
-                return null;
+                var byteRequest = new StringContent(request, 
+                                                    Encoding.UTF8,
+                                                    "text/xml"
+                                                    );
+
+                byteRequest.Headers.ContentType!.CharSet = "utf-8";
+
+                //C# Logs these actions automatically
+                string requestUri = Environment.GetEnvironmentVariable("WSAALoginCmsTestingUri")!;
+                
+                HttpResponseMessage response = await client.PostAsync(requestUri, byteRequest);
+                string? responseToString = await response.Content.ReadAsStringAsync();
+           
+                if(response.StatusCode == System.Net.HttpStatusCode.OK)
+                {
+                    logger.LogInformation("WSAA has responded successfully: StatusCode 200");
+                    WSAAAuthToken token = ParseResponse(responseToString) ?? throw new WSAAServiceException("Error generating WSAAAuthToken: 'NULL' value inside LoginCmsResponse Field");
+                    return token;
+                }
+
+                else
+                {
+                    string errors = ParseErrors(responseToString);
+                    throw new WSAAServiceException("Error generating WSAAAuthToken: WSAA responded with an error: " + response.StatusCode + "\n" + errors);
+                }
             }
             catch (Exception e)
             {
+                logger.LogError("Failed to get WSAA Authentication token: " + e);
                 return null;
             }
         }
@@ -54,13 +80,87 @@ namespace afipServices.src.WSAA
                 xmlNodeIn0!.InnerText = encryptedLoginTicket;
                 logger.LogInformation("Successfully generated RequestLoginCms.xml");
                 
-                return  xmlRequestLoginCms.OuterXml;
+                return xmlRequestLoginCms.OuterXml;
             }
             catch(Exception e)
             {
                 logger.LogError("Failed to generate LoginCmsRequest: " + e);
                 return null;
             }
+        }
+    
+        private WSAAAuthToken? ParseResponse(string response)
+        {
+            var xmlResponse = new XmlDocument();
+            xmlResponse.LoadXml(response);
+
+            XmlNamespaceManager nsManager = new XmlNamespaceManager(xmlResponse.NameTable);
+            nsManager.AddNamespace("soapenv", "http://schemas.xmlsoap.org/soap/envelope/");
+            nsManager.AddNamespace("wsaa", "http://wsaa.view.sua.dvadac.desein.afip.gov");
+
+            XmlNode? loginCmsReturnNode = xmlResponse.SelectSingleNode("//wsaa:loginCmsReturn", nsManager);
+            if (loginCmsReturnNode == null) return null;
+
+            string decodedXml = System.Web.HttpUtility.HtmlDecode(loginCmsReturnNode.InnerText.Trim());
+
+            var innerXml = new XmlDocument();
+            innerXml.LoadXml(decodedXml);
+
+            // Extract the header and credentials nodes
+            XmlNode? headerNode = innerXml.SelectSingleNode("//header");
+            XmlNode? credentialsNode = innerXml.SelectSingleNode("//credentials");
+
+            if (headerNode == null || credentialsNode == null) return null;
+
+            XmlNode? source = headerNode.SelectSingleNode("source");
+            XmlNode? destination = headerNode.SelectSingleNode("destination");
+            XmlNode? uniqueId = headerNode.SelectSingleNode("uniqueId");
+            XmlNode? generationTime = headerNode.SelectSingleNode("generationTime");
+            XmlNode? expirationTime = headerNode.SelectSingleNode("expirationTime");
+            XmlNode? token = credentialsNode.SelectSingleNode("token");
+            XmlNode? sign = credentialsNode.SelectSingleNode("sign");
+
+            if (source == null ||
+                destination == null ||
+                uniqueId == null ||
+                generationTime  == null ||
+                expirationTime == null ||
+                token == null ||
+                sign == null ||
+                string.IsNullOrEmpty(source.InnerText) ||
+                string.IsNullOrEmpty(destination.InnerText) ||
+                string.IsNullOrEmpty(uniqueId.InnerText) ||
+                string.IsNullOrEmpty(generationTime.InnerText) ||
+                string.IsNullOrEmpty(expirationTime.InnerText) ||
+                string.IsNullOrEmpty(token.InnerText) ||
+                string.IsNullOrEmpty(sign.InnerText))
+            {
+                return null;
+            }
+
+            if (!DateTime.TryParse(generationTime.InnerText, out DateTime generationTimeDate) ||
+                !DateTime.TryParse(expirationTime.InnerText, out DateTime expirationTimeDate))
+            {
+                return null;
+            }
+
+            return new WSAAAuthToken
+            {
+                Source = source.InnerText,
+                Destination = destination.InnerText,
+                UniqueId = uniqueId.InnerText,
+                GenerationTime = generationTimeDate,
+                ExpirationTime = expirationTimeDate,
+                Token = token.InnerText,
+                Sign = sign.InnerText
+            };
+
+
+        }
+
+        private string ParseErrors(string failedResponse)
+        {
+            return "";
         }
     }
 }

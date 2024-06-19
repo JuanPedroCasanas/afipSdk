@@ -9,6 +9,6 @@ namespace afipServices.src.WSAA.interfaces
 {
     public interface IWSAAService
     {
-        Task<WSAAAuthToken> GetAuthenticationToken(AfipService service);
+        Task<WSAAAuthToken?> GetAuthenticationToken(AfipService service);
     }
 }
