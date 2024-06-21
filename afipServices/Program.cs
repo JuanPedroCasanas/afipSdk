@@ -35,11 +35,11 @@ Environment.SetEnvironmentVariable("WSAALoginCmsTestingUri", "https://wsaahomo.a
 var encryption = app.Services.GetRequiredService<IEncryptionManager>();
 
 var k = app.Services.GetRequiredService<IWSAAService>();
-/*
+
 var s = await k.GetAuthenticationToken(AfipService.wsfe);
 
 Console.WriteLine(s.ToString());
-*/
+
 app.Run();
 
 

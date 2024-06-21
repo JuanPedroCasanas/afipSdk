@@ -41,19 +41,19 @@ namespace afipServices.src.WSAA
                 
                 HttpResponseMessage response = await client.PostAsync(requestUri, byteRequest);
                 string? responseToString = await response.Content.ReadAsStringAsync();
-           
+
                 if(response.StatusCode == System.Net.HttpStatusCode.OK)
                 {
                     logger.LogInformation("WSAA has responded successfully: StatusCode 200");
                     WSAAAuthToken token = ParseResponse(responseToString) ?? throw new WSAAServiceException("Error generating WSAAAuthToken: 'NULL' value inside LoginCmsResponse Field");
                     return token;
                 }
-
                 else
                 {
-                    string errors = ParseErrors(responseToString);
-                    throw new WSAAServiceException("Error generating WSAAAuthToken: WSAA responded with an error: " + response.StatusCode + "\n" + errors);
+                    WSAAResponseError responseError = ParseError(responseToString);
+                    throw new WSAAServiceException($"Error generating WSAAAuthToken: WSAA response contained faults:\nHttp Response Error Code: { response.StatusCode }\n{ responseError.ToString() }");
                 }
+                
             }
             catch (Exception e)
             {
@@ -100,13 +100,10 @@ namespace afipServices.src.WSAA
 
             XmlNode? loginCmsReturnNode = xmlResponse.SelectSingleNode("//wsaa:loginCmsReturn", nsManager);
             if (loginCmsReturnNode == null) return null;
-
-            string decodedXml = System.Web.HttpUtility.HtmlDecode(loginCmsReturnNode.InnerText.Trim());
-
+            
             var innerXml = new XmlDocument();
-            innerXml.LoadXml(decodedXml);
+            innerXml.LoadXml(loginCmsReturnNode.InnerText.Trim());
 
-            // Extract the header and credentials nodes
             XmlNode? headerNode = innerXml.SelectSingleNode("//header");
             XmlNode? credentialsNode = innerXml.SelectSingleNode("//credentials");
 
@@ -158,9 +155,26 @@ namespace afipServices.src.WSAA
 
         }
 
-        private string ParseErrors(string failedResponse)
+        private WSAAResponseError ParseError(string failedResponse)
         {
-            return "";
+            logger.LogInformation("Parsing WSAA failed response errors...");
+
+            var xmlFailedResponse = new XmlDocument();
+            xmlFailedResponse.LoadXml(failedResponse);
+
+            XmlNamespaceManager nsManager = new XmlNamespaceManager(xmlFailedResponse.NameTable);
+            nsManager.AddNamespace("soapenv", "http://schemas.xmlsoap.org/soap/envelope/");
+
+            var xmlSoapFault = xmlFailedResponse.SelectSingleNode("//soapenv:Fault", nsManager);
+
+            var xmlNodeFaultCode = xmlSoapFault.SelectSingleNode("faultcode");
+            var xmlNodeFaultString = xmlSoapFault.SelectSingleNode("faultstring");
+
+            return new WSAAResponseError {
+                Code = xmlNodeFaultCode.InnerText,
+                Description = xmlNodeFaultString.InnerText
+            };
+            
         }
     }
 }
