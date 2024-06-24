@@ -167,12 +167,12 @@ namespace afipServices.src.WSAA
 
             var xmlSoapFault = xmlFailedResponse.SelectSingleNode("//soapenv:Fault", nsManager);
 
-            var xmlNodeFaultCode = xmlSoapFault.SelectSingleNode("faultcode");
-            var xmlNodeFaultString = xmlSoapFault.SelectSingleNode("faultstring");
+            var xmlNodeFaultCode = xmlSoapFault!.SelectSingleNode("faultcode");
+            var xmlNodeFaultString = xmlSoapFault!.SelectSingleNode("faultstring");
 
             return new WSAAResponseError {
-                Code = xmlNodeFaultCode.InnerText,
-                Description = xmlNodeFaultString.InnerText
+                Code = xmlNodeFaultCode!.InnerText,
+                Description = xmlNodeFaultString!.InnerText
             };
             
         }

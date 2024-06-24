@@ -1,6 +1,7 @@
 using afipServices.src.Common.enums;
 using afipServices.src.Encryption;
 using afipServices.src.Encryption.interfaces;
+using afipServices.src.TokenManager.interfaces;
 using afipServices.src.WSAA;
 using afipServices.src.WSAA.interfaces;
 
@@ -12,6 +13,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<IEncryptionManager, EncryptionManager>();
 builder.Services.AddSingleton<IWSAAService, WSAAService>();
+builder.Services.AddSingleton<ITokenManager, TokenManager>();
 
 var app = builder.Build();
 
@@ -24,21 +26,24 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 //ENVIRONMENT VARIABLES!!!
-Environment.SetEnvironmentVariable("X509CertDir", "./secrets/certificates/certificadoAfipConClaveFinal.pfx");
 
+//DIRS
+Environment.SetEnvironmentVariable("X509CertDir", "./secrets/certificates/certificadoAfipConClaveFinal.pfx");
+Environment.SetEnvironmentVariable("TokensDir", "./secrets/tokens");
+
+
+//URIS
 Environment.SetEnvironmentVariable("WSAALoginCmsTestingUri", "https://wsaahomo.afip.gov.ar/ws/services/LoginCms");
 
 
 
 
 
-var encryption = app.Services.GetRequiredService<IEncryptionManager>();
 
-var k = app.Services.GetRequiredService<IWSAAService>();
 
-var s = await k.GetAuthenticationToken(AfipService.wsfe);
+var k = app.Services.GetRequiredService<ITokenManager>();
 
-Console.WriteLine(s.ToString());
+await k.GetAuthToken(AfipService.wsfe);
 
 app.Run();
 
