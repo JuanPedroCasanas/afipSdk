@@ -10,5 +10,6 @@ namespace afipServices.src.TokenManager.interfaces
     public interface ITokenManager
     {
         public Task<WSAAAuthToken?> GetAuthToken(AfipService afipService);
+        
     }
 }

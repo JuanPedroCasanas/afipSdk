@@ -28,13 +28,9 @@ namespace afipServices.src.Encryption
                 var xmlLoginTicketRequest = new XmlDocument();
                 xmlLoginTicketRequest.Load("./src/Encryption/xmlModels/LoginTicketRequest.xml");
                 logger.LogInformation("Successfully loaded LoginTicketRequest.xml");
-                logger.LogInformation("Getting LoginTicketRequest.xml node: { node }", "uniqueId");
                 var xmlNodeUniqueId = xmlLoginTicketRequest.SelectSingleNode("//uniqueId");
-                logger.LogInformation("Getting LoginTicketRequest.xml node: { node }", "generationTime");
                 var xmlNodeGenerationTime = xmlLoginTicketRequest.SelectSingleNode("//generationTime");
-                logger.LogInformation("Getting LoginTicketRequest.xml node: { node }", "expirationTime");
                 var xmlNodeExpirationTime = xmlLoginTicketRequest.SelectSingleNode("//expirationTime");
-                logger.LogInformation("Getting LoginTicketRequest.xml node: { node }", "service");
                 var xmlNodeService = xmlLoginTicketRequest.SelectSingleNode("//service");
 
                 var generationTime = DateTime.Now.AddMinutes(-10);
