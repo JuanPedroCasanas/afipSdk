@@ -3,16 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace afipServices.src.WSFE.model
+namespace afipServices.src.WSFE.models
 {
-    public class Tribute
+    public class IVA
     {
-       public int Id { get; set; } 
-       public string? Description { get; set; }
+        public int Id { get; set; } 
        //Base imponible
        public double TaxBase { get; set; }
-       //Alicuota
-       public double Aliquot { get; set; }
        public double Value { get; set; }
     }
 }

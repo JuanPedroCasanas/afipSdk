@@ -5,25 +5,40 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
-namespace afipServices.src.WSFE.model
+namespace afipServices.src.WSFE.models
 {
     public class Invoice
     {
-        public bool IsAuthorized { get; set; }
+        public string Cuit { get; set; } = string.Empty;
+
+        public bool IsAuthorized { get; set; } = false;
+
+        //If IsAuthorized == true then these fields are filled:
+        //*--------------------------------------------*//
+        public string? DateOfAuthorization { get; set; }
+        public string? CAE { get; set; }
+        public string? CAEExpirationDate { get; set; }
+        public List<AuthObservation>? AuthObservations { get; set; }
+        public List<AuthEvent>? AuthEvents { get; set; }
+        public List<AuthError>? AuthErrors { get; set; }
+        //*--------------------------------------------*//
 
         //Invoice Header (FeCabReq in Afip doc)
+        //*--------------------------------------------*//
         public int AmountOfInvoices { get; set; } 
         //Must be the same for all asociated invoices
         public int Type { get; set; }
         //Punto de venta
         public int PtoVta { get; set; }
-        
+        //*--------------------------------------------*//
+
         //Invoice Details (FeDetReq in Afip doc)
+        //*--------------------------------------------*//
         public int Concept { get; set; }
         public int DocumentType { get; set; }
         public long DocumentNumber { get; set; }
-        public int FromInvoiceNumber { get; set; } = 1; //Default value one invoice per request
-        public int ToInvoiceNumber { get; set; } = 1; //Default value one invoice per request
+        public int FromInvoiceNumber { get; set; }
+        public int ToInvoiceNumber { get; set; }
         //Must be "YYYYMMDD" Format when sending the XML Request
         public DateTime? GenerationDate { get; set; }
         //ImpTotal
@@ -55,6 +70,7 @@ namespace afipServices.src.WSFE.model
         //Must be a 2 size array
         public DateTime[]? AsociatedPeriod { get; set; }
         public List<Activity>? Activities { get; set; }
+        //*--------------------------------------------*//
 
 
         public void AddTribute(Tribute tribute)
@@ -110,6 +126,33 @@ namespace afipServices.src.WSFE.model
                 Buyers = new List<Buyer>();
             }
             Buyers.Add(buyer);
+        }
+
+        public void AddObservation(AuthObservation authObservation)
+        {
+            if(AuthObservations == null)
+            {
+                AuthObservations = new List<AuthObservation>();
+            }
+            AuthObservations.Add(authObservation);
+        }
+
+        public void AddAuthEvent(AuthEvent authEvent)
+        {
+            if(AuthEvents == null)
+            {
+                AuthEvents = new List<AuthEvent>();
+            }
+            AuthEvents.Add(authEvent);
+        }
+
+        public void AddAuthError(AuthError authError)
+        {
+            if(AuthErrors == null)
+            {
+                AuthErrors = new List<AuthError>();
+            }
+            AuthErrors.Add(authError);
         }
     }
 }

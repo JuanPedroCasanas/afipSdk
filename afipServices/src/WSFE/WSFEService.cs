@@ -4,7 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Xml;
 using afipServices.src.WSAA.models;
-using afipServices.src.WSFE.model;
+using afipServices.src.WSFE.enums;
+using afipServices.src.WSFE.models;
 
 namespace afipServices.src.WSFE
 {
@@ -12,14 +13,14 @@ namespace afipServices.src.WSFE
         ILogger<WSFEService> logger
         )
     {   
-        public string? GenerateAuthorizeInvoiceRequest(WSAAAuthToken token, long cuit, Invoice invoice)
+        public string? GenerateAuthorizeInvoiceRequest(WSAAAuthToken token, Invoice invoice)
         {
             try
             {
-                logger.LogInformation("Reading FECAESolicitar.xml template...");
+                logger.LogInformation("Reading AuthorizeInvoiceRequest.xml template...");
                 var authInvoiceRequestXml = new XmlDocument();
-                authInvoiceRequestXml.Load("./src/WSFE/xmlModels/FECAESolicitar.xml");
-                logger.LogInformation("Successfully loaded FECAESolicitar.xml");
+                authInvoiceRequestXml.Load("./src/WSFE/xmlModels/requests/AuthorizeInvoiceRequest.xml");
+                logger.LogInformation("Successfully loaded AuthorizeInvoiceRequest.xml");
                 
                 XmlNamespaceManager nsManager = new XmlNamespaceManager(authInvoiceRequestXml.NameTable);
                 nsManager.AddNamespace("soapenv", "http://schemas.xmlsoap.org/soap/envelope/");
@@ -27,7 +28,7 @@ namespace afipServices.src.WSFE
 
                 authInvoiceRequestXml.SelectSingleNode("//ar:Token", nsManager)!.InnerText = token.Token;
                 authInvoiceRequestXml.SelectSingleNode("//ar:Sign", nsManager)!.InnerText = token.Sign;
-                authInvoiceRequestXml.SelectSingleNode("//ar:Cuit", nsManager)!.InnerText = cuit.ToString();
+                authInvoiceRequestXml.SelectSingleNode("//ar:Cuit", nsManager)!.InnerText = invoice.Cuit;
                 authInvoiceRequestXml.SelectSingleNode("//ar:CantReg", nsManager)!.InnerText = invoice.AmountOfInvoices.ToString();
                 authInvoiceRequestXml.SelectSingleNode("//ar:PtoVta", nsManager)!.InnerText = invoice.PtoVta.ToString();
                 authInvoiceRequestXml.SelectSingleNode("//ar:CbteTipo", nsManager)!.InnerText = invoice.Type.ToString();
@@ -135,16 +136,19 @@ namespace afipServices.src.WSFE
                     }
                 }
 
-                logger.LogInformation("Successfully generated FECAESolicitar.xml");
+                logger.LogInformation("Successfully generated AuthorizeInvoiceRequest.xml");
                 return authInvoiceRequestXml.OuterXml;
             }
             catch (Exception e)
             {
-                logger.LogError($"Error generating FECAESolicitar.xml: { e }");
+                logger.LogError($"Error generating AuthorizeInvoiceRequest.xml: { e }");
                 return null;
             }
         }
-
+        public string? GenerateGetVariableValuesRequest(WSAAAuthToken token, WSFEVariableTypes type)
+        {
+            return null;
+        }
         private XmlElement CreateElement(XmlDocument doc, string name, string value)
         {
             var element = doc.CreateElement(name);

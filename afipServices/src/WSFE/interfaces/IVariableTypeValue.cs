@@ -7,7 +7,7 @@ namespace afipServices.src.WSFE.interfaces
 {
     public interface IVariableTypeValue
     {
-        public string GetVariableIdentifier();
-        public string GetVariableValue();
+        public string GetIdentifier();
+        public string GetValue();
     }
 }

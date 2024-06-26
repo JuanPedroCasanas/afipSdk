@@ -6,7 +6,7 @@ using afipServices.src.WSAA;
 using afipServices.src.WSAA.interfaces;
 using afipServices.src.WSAA.models;
 using afipServices.src.WSFE;
-using afipServices.src.WSFE.model;
+using afipServices.src.WSFE.models;
 
 var builder = WebApplication.CreateBuilder(args);
 

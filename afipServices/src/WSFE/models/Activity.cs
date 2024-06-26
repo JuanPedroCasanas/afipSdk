@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace afipServices.src.WSFE.model
+namespace afipServices.src.WSFE.models
 {
     public class Activity
     {
