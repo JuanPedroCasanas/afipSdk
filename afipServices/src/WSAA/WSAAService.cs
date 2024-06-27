@@ -37,7 +37,7 @@ namespace afipServices.src.WSAA
                 byteRequest.Headers.ContentType!.CharSet = "utf-8";
 
                 //C# Logs these actions automatically
-                string requestUri = Environment.GetEnvironmentVariable("WSAALoginCmsTestingUri")!;
+                string requestUri = Environment.GetEnvironmentVariable("WSAALoginCmsUri")!;
                 
                 HttpResponseMessage response = await client.PostAsync(requestUri, byteRequest);
                 string? responseToString = await response.Content.ReadAsStringAsync();

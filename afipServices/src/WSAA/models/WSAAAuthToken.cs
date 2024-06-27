@@ -31,6 +31,12 @@ namespace afipServices.src.WSAA.models
             ";
         }
 
+        public string GetCuit() {
+            //Destination has the format: SERIALNUMBER=CUIT XXXXXXXX, CN=environment where XXXXXX is the cuit we want to extract
+            string Cuit = Destination.Split("SERIALNUMBER=CUIT")[1].Split(",")[0].Trim();
+            return Cuit;
+        }
+
         public bool IsExpired()
         {
             int result = ExpirationTime.CompareTo(DateTime.Now);

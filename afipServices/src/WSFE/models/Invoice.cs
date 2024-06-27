@@ -9,7 +9,8 @@ namespace afipServices.src.WSFE.models
 {
     public class Invoice
     {
-        public string Cuit { get; set; } = string.Empty;
+        //Optional field for getting cuit in authorized invoice, it is already included in WSAAAuthToken class
+        public string? Cuit { get; set; }
 
         public bool IsAuthorized { get; set; } = false;
 

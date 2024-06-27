@@ -6,6 +6,7 @@ using afipServices.src.WSAA;
 using afipServices.src.WSAA.interfaces;
 using afipServices.src.WSAA.models;
 using afipServices.src.WSFE;
+using afipServices.src.WSFE.enums;
 using afipServices.src.WSFE.models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -37,50 +38,40 @@ Environment.SetEnvironmentVariable("TokensDir", "./secrets/tokens");
 
 
 //URIS
-Environment.SetEnvironmentVariable("WSAALoginCmsTestingUri", "https://wsaahomo.afip.gov.ar/ws/services/LoginCms");
+//WSAA
+Environment.SetEnvironmentVariable("WSAALoginCmsUri", "https://wsaahomo.afip.gov.ar/ws/services/LoginCms");
+
+//WSFE
+Environment.SetEnvironmentVariable("WSFEParamGetUri_INVOICE_TYPES", "https://wswhomo.afip.gov.ar/wsfev1/service.asmx?op=FEParamGetTiposCbte");
+Environment.SetEnvironmentVariable("WSFEParamGetUri_CONCEPT_TYPES", "https://wswhomo.afip.gov.ar/wsfev1/service.asmx?op=FEParamGetTiposConcepto");
+Environment.SetEnvironmentVariable("WSFEParamGetUri_DOCUMENT_TYPES", "https://wswhomo.afip.gov.ar/wsfev1/service.asmx?op=FEParamGetTiposDoc");
+Environment.SetEnvironmentVariable("WSFEParamGetUri_IVA_TYPES", "https://wswhomo.afip.gov.ar/wsfev1/service.asmx?op=FEParamGetTiposIva");
+Environment.SetEnvironmentVariable("WSFEParamGetUri_CURRENCY_TYPES", "https://wswhomo.afip.gov.ar/wsfev1/service.asmx?op=FEParamGetTiposMonedas");
+Environment.SetEnvironmentVariable("WSFEParamGetUri_OPTIONAL_TYPES", "https://wswhomo.afip.gov.ar/wsfev1/service.asmx?op=FEParamGetTiposOpcional");
+Environment.SetEnvironmentVariable("WSFEParamGetUri_TRIBUTE_TYPES", "https://wswhomo.afip.gov.ar/wsfev1/service.asmx?op=FEParamGetTiposTributos");
 
 
 
 
 
-
-
+var s = app.Services.GetRequiredService<ITokenManager>();
 var k = app.Services.GetRequiredService<WSFEService>();
 
-var token = new WSAAAuthToken
+var token = await s.GetAuthToken(AfipService.wsfe);
+
+if (token != null)
 {
-    Token = "ASdsa",
-    Sign = "SADASD"
-};
-
-Invoice invoice = new Invoice
+var list = await k.GetVariableTypeValues(token, WSFEVariableTypes.TRIBUTE_TYPES);
+if(list != null)
 {
-    AmountOfInvoices = 1,
-    PtoVta = 1,
-    Type = 1,
-    Concept = 1,
-    DocumentType = 80, // Example: 80 represents CUIT for Argentinian documents
-    DocumentNumber = 20345678901,
-    FromInvoiceNumber = 1,
-    ToInvoiceNumber = 1,
-    GenerationDate = DateTime.Now.AddHours(1),
-    FinalTotalValue = 1000.0,
-    NonTaxedNetValue = 0.0,
-    TaxedNetValue = 1000.0,
-    ExemptValue = 0.0,
-    TributeValue = 0.0,
-    IVAValue = 0.0
-};
-
-invoice.AddActivity(new Activity {Id = 123 });
-
-invoice.AddBuyer(new Buyer{ DocumentNumber = 534534, DocumentType= 80, OwnershipPercentage = 20.4});
-invoice.AddBuyer(new Buyer{ DocumentNumber = 45345345, DocumentType= 80, OwnershipPercentage = 26.4});
+    foreach(var e in list)
+    {
+        Console.WriteLine(e.ToString());
+    }
+}
+}
 
 
-
-string s = k.GenerateAuthorizeInvoiceRequest(token, 232123, invoice);
-Console.WriteLine(s);
 app.Run();
 
 

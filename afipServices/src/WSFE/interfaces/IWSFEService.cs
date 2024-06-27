@@ -16,7 +16,7 @@ namespace afipServices.src.WSFE.interfaces
 
         public Invoice? GetLastAuthorizedInvoice(WSAAAuthToken token, string cuit, int ptoVta, int invoiceType);
 
-        public List<IVariableTypeValue> GetVariableValues(WSAAAuthToken token, WSFEVariableTypes type);
+        public List<VariableTypeValue> GetVariableValues(WSAAAuthToken token, WSFEVariableTypes type);
 
         
     }

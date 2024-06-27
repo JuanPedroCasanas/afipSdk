@@ -36,7 +36,7 @@ namespace afipServices.src.TokenManager.interfaces
                     token = null;
                 }
             }
-            logger.LogInformation($"Successfully fetched token for { afipService } service");
+            logger.LogInformation($"Successfully retrieved token for { afipService } service");
             return token;
         }
 
